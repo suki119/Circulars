@@ -1,0 +1,22 @@
+/* variables.css */
+:root {
+
+  --theam-color: #157a3d;
+  --card-color: lightgreen;
+  --content-container-bg-light: white;
+  --content-container-bg-dark: #111;
+  /* Define a dark background color */
+
+  --save-btn-bg-dark: #111;
+  /* Define a dark background color */
+  --save-btn-bg-light: #157a3d;
+  /* Define a dark background color */
+
+  --cancel-btn-bg-dark: #000000;
+  --cancel-btn-bg-light: #f9f9f9;
+
+  --cancel-btn-color-dark: #f9f9f9;
+  --cancel-btn-color-light: #157a3d;
+
+
+}
