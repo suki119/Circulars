@@ -1,13 +1,13 @@
 import React from 'react';
 import { Layout, Row, Col, Typography, Space } from 'antd';
 import { MailOutlined, PhoneOutlined, EnvironmentOutlined, FacebookOutlined, TwitterOutlined, LinkedinOutlined } from '@ant-design/icons';
-
+import {companyDetails} from '../../enums/constants';
 const { Footer } = Layout;
 const { Text, Link } = Typography;
 
 function AppFooter(props) {
     return (
-        <Footer style={{  color: 'white', textAlign: 'center', padding: '24px 50px',marginTop:'20px' }}>
+        <Footer style={{ textAlign: 'center', padding: '20px 20px', marginTop: '20px' }}>
             {/* <Row gutter={[16, 16]} justify="center">
                 <Col xs={24} sm={12} md={8} lg={8}>
                     <Space direction="vertical">
@@ -34,7 +34,14 @@ function AppFooter(props) {
                 </Col>
             </Row> */}
             <div style={{ marginTop: '20px' }}>
-                <Text>sukithadhamsara ©2023 All Rights Reserved</Text>
+                <Row justify="center">
+                    <Text><PhoneOutlined /> Phone: {companyDetails.PHONE_NUMBER}</Text>
+                </Row>
+                <Row justify="center">
+                    <Text>sukithadhamsara ©2023 All Rights Reserved</Text>
+                </Row>
+
+
             </div>
         </Footer>
     );

@@ -20,7 +20,8 @@ const FileUploadSchema = new mongoose.Schema({
     },
     date: {
         type: String
-    }
+    },
+   
 });
 
 const fileUpload = mongoose.model('FileUpload', FileUploadSchema);

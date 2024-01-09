@@ -38,7 +38,11 @@ const UserSchema = new mongoose.Schema({
     },
     passwordstatus: {
         type: String
-    }
+    },
+    circularsAccess: {
+        type: String,
+        required: true
+    },
 });
 
 const user = mongoose.model('User', UserSchema);

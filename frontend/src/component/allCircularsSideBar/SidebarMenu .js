@@ -20,7 +20,7 @@ function AllCircularsSidebar({ isDarkMode, setSelectedDivision }) {
 
   const onMenuClick = ({ key }) => {
     const parts = key.split('-');
-    console.log("key1s",key)
+  
     setSelectedKey(key)
 
 
@@ -30,7 +30,7 @@ function AllCircularsSidebar({ isDarkMode, setSelectedDivision }) {
       selectedItem = items.find((item,index) => {
         
         if (item.children && item.key === parts[1]) {
-          console.log(item)
+      
           const childItem = item.children.find((child, index) => index.toString() === parts[2]);
           return childItem !== undefined;
         }

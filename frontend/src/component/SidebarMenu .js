@@ -13,11 +13,11 @@ function SidebarMenu({ isDarkMode }) {
   };
 
   const onMenuClick = ({ key }) => {
-    console.log("this is key",key)
+    
     // If the clicked item doesn't have children, clear openKeys
-    const selectedItem = items.find((item) => item.link === key);
+    const selectedItem = items().find((item) => item.link === key);
     if (selectedItem && !selectedItem.children) {
-      console.log("this selectedItem key",selectedItem)
+   
       setOpenKeys([]);
     }
   };
@@ -33,7 +33,7 @@ function SidebarMenu({ isDarkMode }) {
       onOpenChange={handleOpenChange}
       onClick={onMenuClick}
     >
-      {items.map((item) =>
+      {items().map((item) =>
         item.children ? (
           <Menu.SubMenu key={item.key} icon={item.icon} title={item.label}>
             {item.children.map((child) => (

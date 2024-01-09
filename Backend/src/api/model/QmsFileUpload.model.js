@@ -33,6 +33,14 @@ const QmsFileUploadSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    unite: {
+        type: String,
+        required: true
+    },
+    refrences: [{
+        type: String,
+        required: false
+    }],
 });
 
 const fileUpload = mongoose.model('QmsFileUpload', QmsFileUploadSchema);

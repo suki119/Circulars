@@ -1,7 +1,9 @@
 export let appURLs = {
   web: 'http://localhost:4000/',
 
-  //web: 'http://203.115.26.13:4000/'
+  // web: 'http://203.115.26.13:4000/',
+
+
 }
 
 
@@ -16,20 +18,32 @@ export const webAPI = {
 
   pdfFileInsert: 'upload/',
   pdfFileDelete: 'upload/',
+  pdfFileUpdate: 'upload/',
 
   /************************ User API *********************************/
   login: 'user/login',
-  userInsert:'user/register',
-  getAllUsers:'user/',
-  updateUser:'user/',
-  deleteUser:'user/',
+  userInsert: 'user/register',
+  getAllUsers: 'user/',
+  updateUser: 'user/',
+  deleteUser: 'user/',
+  getUserById: 'user/',
 
 
-   /************************QMS PDF File Upload API *********************************/
+  /************************QMS PDF File Upload API *********************************/
 
   qmsPdfFileInsert: 'QMS-upload/',
   qmsPdfFileDelete: 'QMS-upload/',
+  qmsGetAllCirculars: 'QMS-upload/',
+  qmsPdfFileUpdate: 'QMS-upload/',
+  viewAllByDocumentLevel: 'QMS-upload/viewAllByDocumentLevel',
+  getFileUploadById: 'QMS-upload/getFileUploadById/',
 
+  /************************User Logs API *********************************/
+
+  viewAllLogs: 'log/',
+  insertAllLogs: 'log/',
+  updateLogs: 'log/',
+  
 
 
 }

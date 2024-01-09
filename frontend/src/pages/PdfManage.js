@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Breadcrumb, Layout, Divider, Row, Col, message, Empty, Space, Table, Checkbox, Modal } from 'antd';
+import { Breadcrumb, Layout, Divider, Row, Col, message, Empty, Space, Table, Checkbox, Modal, theme, Tag, Switch } from 'antd';
 import { Form, Input, Select, Button, DatePicker, Upload, message as AntMessage } from 'antd';
 import { InboxOutlined } from '@ant-design/icons';
+import { PlusOutlined } from '@ant-design/icons';
 import moment from 'moment';
 import { divisions } from '../enums/constants'
 import axios from "axios";
@@ -15,6 +16,15 @@ import Highlighter from 'react-highlight-words';
 import EditButton from '../component/commonComponent/Buttons/IconButtons/EditButton';
 import deleteButton from '../component/commonComponent/Buttons/IconButtons/DeleteButton ';
 import DeleteButton from "../component/commonComponent/Buttons/IconButtons/DeleteButton ";
+import {
+    unites,
+    UserRoles,
+    DocumentLevels,
+    DL1_SubLevels,
+    DL2_SubLevels,
+    DL3_SubLevels,
+    DL4_SubLevels
+} from '../enums/constants'
 
 
 const { Item } = Form;
@@ -26,54 +36,74 @@ const { Dragger } = Upload;
 function PdfManage({ isDarkMode }) {
 
     const screenWidth = window.innerHeight;
-
-
-    const [Pdfform] = Form.useForm();
+    const screenHeight = window.innerHeight;
+    const { token } = theme.useToken();
     const [form] = Form.useForm();
+    const [formSearch] = Form.useForm();
+
     const [loaderStatus, setLoaderStatus] = useState(false);
     const history = useHistory();
     const [allCirculars, setAllCirculars] = useState([]);
     const [allPrevCirculars, setAllPrvCirculars] = useState([]);
-
+    const [tags, setTags] = useState(['']);
     const [selectedDivision, setSelectedDivision] = useState('');
     const [searchText, setSearchText] = useState('');
     const [searchedColumn, setSearchedColumn] = useState('');
     const searchInput = useRef(null);
     const [isEditDialogVisible, setEditDialogVisible] = useState(false);
     const [editRecord, setEditRecord] = useState(null);
+    const [inputVisible, setInputVisible] = useState(false);
+    const [inputValue, setInputValue] = useState('');
+    const inputRef = useRef(null);
+    const [qmsAccess, setQmsAccess] = useState(false);
+    const [documentSubLevel, setDocumentSubLevel] = useState([]);
+    const [qmsAccessCirculars, setQmsAccessCirculars] = useState(false);
+    const [initialDateValue, setInitialDateValue] = useState(null);
+    const [refrenceOptions, setRefrenceOptions] = useState([]);
+    const [refPdfList, setRefPdfList] = useState([]);
+
 
 
 
 
     const onFinish = (values, event) => {
 
-        //  event.preventDefault();
+
         // Handle form submission here
-        console.log('Received values:', values);
+        const ref = values.refrences1;
+        const newRefString = ref.map(refobject => refobject.value || refobject).join(',');
 
-        const pdfFileData = values.pdfUpload[0].originFileObj;
 
+        let endPath = webAPI.pdfFileUpdate;
         const formData = new FormData();
+        let pdfData = {}
 
-        formData.append("eng_title", values.pdfTitle);
-        formData.append("sin_title", values.pdfTitle);
-        formData.append("division", values.division);
-        formData.append("keywords", 'tags');
-        formData.append("date", values.date);
-        formData.append("document", pdfFileData);
+        if (qmsAccessCirculars) {
+            pdfData.qmsAccess = values.qmsAccess;
+            pdfData.subLevel = values.subLevel;
+            pdfData.documentLevel = values.documentLevel;
+            pdfData.refrences = [newRefString === "" ? undefined : newRefString];
 
-        const config = {
-            headers: {
-                'content-type': 'multipart/form-data'
-            }
-        };
+            endPath = webAPI.qmsPdfFileUpdate;
+        }
+
+        pdfData.eng_title = values.sin_title;
+        pdfData.sin_title = values.sin_title;
+        pdfData.division = values.division;
+        pdfData.date = values.date;
+
+        pdfData.keywords = tags.join(',');
+        pdfData.date = values.date;
+
 
 
         setLoaderStatus(true)
-        axios.post(appURLs.web + webAPI.pdfFileInsert, formData, config)
+        axios.put(appURLs.web + endPath + editRecord._id, pdfData)
             .then((res) => {
                 setLoaderStatus(false)
-                history.push('/allCirculars');
+                getAllCirculars();
+                onCancel();
+                // history.push('/allCirculars');
             })
             .catch((error) => {
 
@@ -91,7 +121,7 @@ function PdfManage({ isDarkMode }) {
     };
 
     const handleClear = () => {
-        form.resetFields(); // Reset form fields
+        formSearch.resetFields(); // Reset form fields
         getAllCirculars();
     };
 
@@ -106,20 +136,19 @@ function PdfManage({ isDarkMode }) {
 
 
     const handleSearch = (selectedKeys, confirm, dataIndex) => {
-        console.log("selectedKeys,confirm1,",selectedKeys)
-        console.log("selectedKeys,confirm2,",confirm)
-        console.log("selectedKeys,confirm3,",dataIndex)
+
         confirm();
         setSearchText(selectedKeys[0]);
         setSearchedColumn(dataIndex);
     };
 
-    const handleReset = (clearFilters) => {
-      
+    const handleReset = (clearFilters,confirm) => {
+
         clearFilters();
         setSearchText('');
-       
-       
+        confirm();
+
+
     };
 
     const getColumnSearchProps = (dataIndex) => ({
@@ -154,7 +183,7 @@ function PdfManage({ isDarkMode }) {
                         Search
                     </Button>
                     <Button
-                        onClick={() => clearFilters && handleReset(clearFilters)}
+                        onClick={() => clearFilters && handleReset(clearFilters,confirm)}
                         size="small"
                         style={{
                             width: 90,
@@ -219,10 +248,14 @@ function PdfManage({ isDarkMode }) {
 
 
     const getAllCirculars = () => {
+        let endPoint = webAPI.getAllCirculars;
+        if (qmsAccessCirculars) {
+            endPoint = webAPI.qmsGetAllCirculars;
+        }
         setLoaderStatus(true)
-        axios.get(appURLs.web + webAPI.getAllCirculars)
+        axios.get(appURLs.web + endPoint)
             .then((res) => {
-                console.log(res)
+
                 if (res.status === 200) {
 
                     setAllCirculars(res.data);
@@ -245,16 +278,176 @@ function PdfManage({ isDarkMode }) {
             });
     };
 
-    const onEditBtn = record => {
+    useEffect(() => {
+        if (inputVisible) {
+            inputRef.current?.focus();
+        }
+    }, [inputVisible]);
 
-        const momentDate = moment(record.date);
-        Pdfform.setFieldsValue({...record,date: momentDate,});
-        console.log("edit", record)
-        setEditRecord(record);
-        setEditDialogVisible(true);
+    const handleClose = (removedTag) => {
+        const newTags = tags.filter((tag) => tag !== removedTag);
+
+        setTags(newTags);
+    };
+
+
+    const forMap = (tag) => {
+        const tagElem = (
+            <Tag
+                closable
+                onClose={(e) => {
+                    e.preventDefault();
+                    handleClose(tag);
+                }}
+            >
+                {tag}
+            </Tag>
+        );
+        return (
+            <span
+                key={tag}
+                style={{
+                    display: 'inline-block',
+                }}
+            >
+                {tagElem}
+            </span>
+        );
+    };
+
+    const tagChild = tags.map(forMap);
+
+    const tagPlusStyle = {
+        background: token.colorBgContainer,
+        borderStyle: 'dashed',
+    };
+
+
+    const showInput = () => {
+        setInputVisible(true);
+    };
+
+    const handleInputChange = (e) => {
+        setInputValue(e.target.value);
+    };
+    const handleInputConfirm = () => {
+        if (inputValue && tags.indexOf(inputValue) === -1) {
+            setTags([...tags, inputValue]);
+        }
+
+        setInputVisible(false);
+        setInputValue('');
+    };
+
+    const getReffrencedList = async (record) => {
+
+
+        const refList = record?.refrences[0]?.split(",");
+        const refrencePdfList = [];
+        const promises = [];
+
+        refList?.forEach(data => {
+            setLoaderStatus(true);
+            if(data !== "undefined"){
+                const promise = axios.get(appURLs.web + webAPI.getFileUploadById + data)
+                    .then((res) => {
+                        if (res.status === 200) {
+                            let refOptionData = {
+                                value: res.data._id,
+                                label: res.data.sin_title
+                            }
+                            refrencePdfList.push(refOptionData);
+                            setLoaderStatus(false);
+                        }
+                    })
+                    .catch((error) => {
+                        setLoaderStatus(false);
+                        Swal.fire({
+                            position: 'top-end',
+                            icon: 'error',
+                            title: 'Network Error',
+                            showConfirmButton: false,
+                            timer: 1500,
+                        });
+                        console.error("Error", error);
+                    });
+
+                promises.push(promise);
+            }
+        });
+
+        // Wait for all promises to resolve
+        try {
+            await Promise.all(promises);
+
+            // This block will be executed after all promises are resolved
+
+
+
+            return refrencePdfList;
+        } catch (error) {
+            console.error("Error", error);
+        }
+
+
+
+    }
+
+
+
+    const onEditBtn = async (record) => {
+
+        const value = record.documentLevel;
+        let refList = []
+
+        try {
+
+            if (record.qmsAccess) {
+                if (value === 'DL1') {
+                    getAllRefrences('DL2');
+
+                } else if (value === 'DL2') {
+                    getAllRefrences('DL3');
+
+                } else if (value === 'DL3') {
+                    getAllRefrences('DL4');
+
+                }
+                else if (value === 'DL4') {
+                    setRefrenceOptions([]);
+
+                }
+
+                refList = await getReffrencedList(record);
+                setRefPdfList(refList);
+
+            }
+
+            const momentDate = moment(record.date); // Convert the date string to a moment object
+
+            setInitialDateValue(momentDate.isValid() ? momentDate : null);
+            setTimeout(() => {
+                form.setFieldsValue({ ...record, date: momentDate, refrences1: refList });
+                setEditDialogVisible(true);
+            }, 0);
+
+            const tags = record.keywords;
+            setQmsAccess(record.qmsAccess);
+            setTags(tags.split(","));
+            setEditRecord(record);
+
+        } catch (error) {
+            console.error("Error", error);
+        }
     }
 
     const onDeleteBtn = record => {
+
+        let endPath = webAPI.pdfFileDelete;
+
+        if (qmsAccessCirculars) {
+            endPath = webAPI.qmsPdfFileDelete;
+        }
 
 
         Swal.fire({
@@ -269,7 +462,7 @@ function PdfManage({ isDarkMode }) {
         }).then((result) => {
             if (result.isConfirmed) {
                 setLoaderStatus(true)
-                axios.delete(appURLs.web + webAPI.pdfFileDelete + record._id).then((res) => {
+                axios.delete(appURLs.web + endPath + record._id).then((res) => {
 
                     if (res.status == '200') {
                         getAllCirculars();
@@ -334,9 +527,8 @@ function PdfManage({ isDarkMode }) {
             render: text => {
                 const formattedDate = new Date(text).toLocaleDateString('en-GB'); // Adjust the locale as needed
                 return <span style={{ whiteSpace: 'pre-line' }}>{formattedDate}</span>;
-              },
+            },
         },
-      
 
         {
             title: 'Circular Name',
@@ -353,15 +545,27 @@ function PdfManage({ isDarkMode }) {
             key: 'keywords',
             width: '15%',
             ...getColumnSearchProps('keywords'),
-            ellipsis: true
-            
+            ellipsis: true,
+            render: text => (
+                <div>
+                    {text.split(',').map((tag, index) => (
+                        index < 2 && (
+                            <Tag key={index} color="green">
+                                {tag.trim()}
+                            </Tag>
+                        )
+
+                    ))}
+                </div>
+            ),
         },
         {
             title: 'Action',
             dataIndex: '',
             key: 'x',
-            width: '15%',
+            width: '25%',
             render: record => <div style={{ textAlign: 'center', display: 'flex', "placeContent": 'space-evenly' }}>
+
                 <EditButton onClick={() => onEditBtn(record)} />
                 <DeleteButton onClick={() => onDeleteBtn(record)} />
 
@@ -373,7 +577,8 @@ function PdfManage({ isDarkMode }) {
 
 
     useEffect(() => {
-    }, [selectedDivision]);
+        getAllCirculars();
+    }, [qmsAccessCirculars]);
 
     useEffect(() => {
 
@@ -381,13 +586,100 @@ function PdfManage({ isDarkMode }) {
 
     }, []);
 
-    const onCancel = () => {
-       
+    const onCancel = async () => {
+
+        await modalHandleClear();
         setEditDialogVisible(false);
-      
+
+    };
+
+    const getAllRefrences = (value) => {
+
+
+        setLoaderStatus(true)
+        axios.post(appURLs.web + webAPI.viewAllByDocumentLevel, { documentLevel: value })
+            .then((res) => {
+
+                if (res.status === 200) {
+
+                    const refrenceOptions = res.data.map(item => ({
+                        value: item._id,
+                        label: item.sin_title
+                    }));
+
+                    setRefrenceOptions(refrenceOptions);
+                    setLoaderStatus(false)
+
+                }
+                // setLoader(false);
+            })
+            .catch((error) => {
+                setLoaderStatus(false)
+                Swal.fire({
+                    position: 'top-end',
+                    icon: 'error',
+                    title: 'Network Error',
+                    showConfirmButton: false,
+                    timer: 1500,
+                });
+                console.error("Error", error);
+            });
+
+
+    }
+
+    const onDocLevelSelect = (value) => {
+
+        setEditRecord((prevEditRecord) => ({
+            ...prevEditRecord,
+            subLevel: [],
+        }));
+
+        setTimeout(() => {
+
+            form.resetFields(['subLevel']);
+        }, 0);
+
+        form.resetFields(['subLevel']);
+
+        if (value === 'DL1') {
+            getAllRefrences('DL2');
+            setDocumentSubLevel(DL1_SubLevels)
+        } else if (value === 'DL2') {
+            getAllRefrences('DL3');
+            setDocumentSubLevel(DL2_SubLevels)
+        } else if (value === 'DL3') {
+            getAllRefrences('DL4');
+            setDocumentSubLevel(DL3_SubLevels)
+        }
+        else if (value === 'DL4') {
+            setRefrenceOptions([]);
+            setDocumentSubLevel(DL4_SubLevels)
+        }
+
+    }
+
+    const modalHandleClear = async () => {
+        setRefPdfList([]);
+        form.resetFields(); // Reset form fields
+        setQmsAccess('')
+        setEditRecord('');
+        setDocumentSubLevel([]);
+
+
+
+        try {
+            // Introduce a small delay before resetting form fields
+            await new Promise(resolve => setTimeout(resolve, 0));
+            form.resetFields();
+
+        } catch (error) {
+            console.error('Error resetting form fields:', error);
+        }
     };
 
     return (
+
         <div>
             <Breadcrumb style={{ margin: '10px 0' }}>
                 <Breadcrumb.Item>PDF Management</Breadcrumb.Item>
@@ -407,7 +699,7 @@ function PdfManage({ isDarkMode }) {
 
                         <Form
 
-                            form={form}
+                            form={formSearch}
                             name="pdfUploadForm"
 
                             labelCol={{ span: 24 }}
@@ -416,8 +708,29 @@ function PdfManage({ isDarkMode }) {
                             layout='vertical'
                         >
 
+
+
                             <Row gutter={16}>
-                                <Col lg={12} xs={24}>
+                                <Col lg={5} xs={24}>
+
+                                    <Item
+                                        label="QMS Access "
+                                        name="qmsAccessCirculars"
+
+                                        style={{ display: 'inline-flex', marginTop: '10px' }}
+                                    >
+
+                                        <Switch
+                                            checked={qmsAccessCirculars}
+                                            onChange={(checked) => setQmsAccessCirculars(checked)}
+                                            checkedChildren="Granted"
+                                            unCheckedChildren="Denied"
+                                            style={{ marginTop: '-10px', backgroundColor: qmsAccessCirculars ? 'var( --theam-color)' : 'gray' }}
+                                        />
+                                    </Item>
+
+                                </Col>
+                                <Col lg={11} xs={24}>
                                     <Item
                                         label=""
                                         name=""
@@ -437,7 +750,7 @@ function PdfManage({ isDarkMode }) {
                                     </Item>
                                 </Col>
 
-                                <Col lg={12} xs={24}>
+                                <Col lg={8} xs={24}>
                                     <Item
                                         label=""
                                         name="."
@@ -457,13 +770,14 @@ function PdfManage({ isDarkMode }) {
                             </Row>
                         </Form>
 
-                        <Table columns={columns} dataSource={allCirculars}
+                        <Table columns={columns} dataSource={allCirculars} style={{ marginTop: '-30px' }}
 
                             pagination={{
                                 pageSize: 10,
                             }}
                             scroll={{
-                                y: screenWidth > 960 ? 560 : 270,
+                                y: screenHeight > 900 ? "90%" : 350,
+                                x: true
 
                             }}
 
@@ -478,17 +792,18 @@ function PdfManage({ isDarkMode }) {
                 title="Edit PDF"
                 visible={isEditDialogVisible}
                 onCancel={onCancel}
-                onOk={() => Pdfform.submit()}
+                onOk={() => form.submit()}
                 width={'75%'}
+                footer={null}
             >
                 <Form
-                    form={Pdfform}
+                    form={form}
                     name="pdfUploadForm"
                     onFinish={onFinish}
                     labelCol={{ span: 24 }}
                     wrapperCol={{ span: 24 }}
                     initialValues={{
-                        ...editRecord, // Set initial values from the editRecord
+                        qmsAccess: qmsAccess == null ? false : qmsAccess
                     }}
                     layout="vertical"
                 >
@@ -513,14 +828,156 @@ function PdfManage({ isDarkMode }) {
                         </Col>
                         <Col lg={12} xs={24}>
                             <Item label="Date" name="date" rules={[{ required: true, message: 'Please select the date!' }]}>
-                                <DatePicker style={{ width: '100%' }} disabled />
+                                <DatePicker style={{ width: '100%' }} defaultValue={initialDateValue} />
                             </Item>
                         </Col>
                     </Row>
 
-                    <Item label="Remark" name="remark">
-                        <TextArea />
+                    <Item label="Key Words" name="keywords">
+                        <div>
+                            <div
+                                style={{
+                                    marginBottom: 16,
+                                }}
+                            >
+                                {tags && tags.map((tag, index) => (
+                                    <Tag
+                                        key={tag}
+                                        closable
+                                        onClose={() => handleClose(tag)}
+                                    >
+                                        {tag}
+                                    </Tag>
+                                ))}
+                            </div>
+                            {inputVisible ? (
+                                <Input
+                                    ref={inputRef}
+                                    type="text"
+                                    size="small"
+                                    style={{
+                                        width: 78,
+                                    }}
+                                    value={inputValue}
+                                    onChange={handleInputChange}
+                                    onBlur={handleInputConfirm}
+                                    onPressEnter={handleInputConfirm}
+                                />
+                            ) : (
+                                <Tag onClick={showInput} style={tagPlusStyle}>
+                                    <PlusOutlined /> New Tag
+                                </Tag>
+                            )}
+                        </div>
                     </Item>
+
+
+                    {qmsAccessCirculars && <Row gutter={16}>
+                        <Col lg={12} xs={24}>
+
+                            <Item
+                                label="QMS Access"
+                                name="qmsAccess"
+
+                                style={{ display: 'inline-flex', marginTop: '10px' }}
+                            >
+
+                                <Switch
+                                    disabled
+                                    checked={qmsAccess}
+                                    onChange={(checked) => setQmsAccess(checked)}
+                                    checkedChildren="True"
+                                    unCheckedChildren="False"
+                                    style={{ marginTop: '-10px', backgroundColor: qmsAccess ? 'var( --theam-color)' : 'gray' }}
+                                    defaultChecked={qmsAccess}
+                                />
+                            </Item>
+
+                        </Col>
+
+                    </Row>}
+
+                    {qmsAccessCirculars && <><Divider orientation="left" orientationMargin="0" style={{ marginTop: '-25px' }}>PDF Accsess Details</Divider><Row gutter={16}>
+                        <Col lg={12} xs={24}>
+                            <Item
+                                label="Document Accsess Level"
+                                name="documentLevel"
+                                rules={[{ required: true, message: 'Please select the Document Accsess Level!' }]}
+                            >
+                                <Select
+
+                                    placeholder="Search to Select"
+                                    onChange={(value) => onDocLevelSelect(value)}
+
+                                    options={DocumentLevels} />
+                            </Item>
+                        </Col>
+                        <Col lg={12} xs={24}>
+                            <Item
+                                label="Sub Level"
+                                name="subLevel"
+                                rules={[{ required: true, message: 'Please select the Sub Level!' }]}
+                            >
+                                <Select
+
+                                    placeholder="Search to Select"
+
+                                    options={documentSubLevel} />
+                            </Item>
+                        </Col>
+                    </Row>
+                        <Row>
+                            <Col lg={12} xs={24}>
+                                <Item
+                                    label="Refrences"
+                                    name="refrences1"
+
+                                >
+
+                                    <Select
+
+                                        mode="multiple"
+                                        allowClear
+                                        showSearch
+                                        placeholder="Select the Refrences"
+                                        optionFilterProp="children"
+                                        filterOption={(input, option) => (option?.label ?? '').includes(input)}
+                                        filterSort={(optionA, optionB) =>
+                                            (optionA?.label ?? '').toLowerCase().localeCompare((optionB?.label ?? '').toLowerCase())
+                                        }
+                                        options={refrenceOptions}
+
+                                    />
+                                </Item>
+                            </Col>
+                        </Row></>
+
+                    }
+
+                    <Row style={{ marginBottom: "10px", }}>
+                        <Col span={24} style={{ textAlign: 'right' }}>
+                            <Button type="default" onClick={onCancel} style={{
+                                marginRight: '8px',
+                                backgroundcolor: isDarkMode ? 'var(--cancel-btn-bg-dark)' : 'var(--cancel-btn-bg-light)',
+                                color: isDarkMode ? 'var( --cancel-btn-color-dark)' : 'var(--cancel-btn-color-light)'
+
+                            }}>
+                                <span style={{ fontWeight: '700' }}>CANCEL</span>
+                            </Button>
+                            <Button type="default" onClick={modalHandleClear} style={{
+                                marginRight: '8px',
+                                backgroundcolor: isDarkMode ? 'var(--cancel-btn-bg-dark)' : 'var(--cancel-btn-bg-light)',
+                                color: isDarkMode ? 'var( --cancel-btn-color-dark)' : 'var(--cancel-btn-color-light)'
+
+                            }}>
+                                <span style={{ fontWeight: '700' }}>RESET</span>
+                            </Button>
+                            <Button type="primary" htmlType="submit" className="common-save-btn common-btn-color">
+                                <span style={{ fontWeight: '600' }}>SAVE</span>
+                            </Button>
+                        </Col>
+                    </Row>
+
                 </Form>
             </Modal>
             {loaderStatus && <Loader />}

@@ -3,15 +3,18 @@ import axios from "axios";
 import Loader from '../component/commonComponent/Loader';
 import Swal from 'sweetalert2'
 import { appURLs, webAPI } from '../enums/urls';
-import {  filePaths } from '../enums/constants';
-import { Breadcrumb, Layout, Divider, Row, Col, message, Empty ,Space, Table } from 'antd';
+import { filePaths } from '../enums/constants';
+import { Breadcrumb, Layout, Divider, Row, Col, message, Empty, Space, Table, Tag } from 'antd';
 import { Form, Input, Select, Button } from 'antd';
 import Highlighter from 'react-highlight-words';
 import { SearchOutlined, ExportOutlined } from '@ant-design/icons';
 import AccountCSS from '../component/pagesComponent/account.module.css';
 import './AllCirculars.css';
-import { Document, Page } from "react-pdf/dist/esm/entry.webpack";
+import {
+    OtherCircularsSites
+} from '../enums/constants'
 
+const { Option } = Select;
 const { Item } = Form;
 const { Header, Content } = Layout;
 function AllCirculars({ selectedDivision, isDarkMode }) {
@@ -28,14 +31,16 @@ function AllCirculars({ selectedDivision, isDarkMode }) {
     const [newCircularList, setNewCircularList] = useState([]);
     const [selectedRow, setSelectedRow] = useState(null);
     const [selectedPdfFile, setSelectedPdfFile] = useState(null);
+    const [duplicateAllCirculars, setDuplicateAllCirculars] = useState([]);
+    const [fileExists, setFileExists] = useState(true);
 
     const getAllCirculars = () => {
         setLoaderStatus(true)
         axios.get(appURLs.web + webAPI.getAllCirculars)
             .then((res) => {
-                console.log(res)
-                if (res.status === 200) {
 
+                if (res.status === 200) {
+                    setDuplicateAllCirculars(res.data);
                     setAllCirculars(res.data);
                     setLoaderStatus(false)
 
@@ -57,44 +62,49 @@ function AllCirculars({ selectedDivision, isDarkMode }) {
 
     useEffect(() => {
 
-        const currentPosts = allCirculars
-            .filter((value) => {
-                if (searchTerm === "" && selectedDivision === "" && searchDate === "") {
-                    return value;
-                } else if (
-                    (value.eng_title.toLowerCase().includes(searchTerm.toLowerCase()) &&
-                        value.division.toLowerCase().includes(selectedDivision.toLowerCase()) &&
-                        value.date.includes(searchDate))
+        if (selectedDivision === "All") {
 
-                    ||
+            setAllCirculars(duplicateAllCirculars);
 
-                    (value.sin_title.toLowerCase().includes(searchTerm) &&
-                        value.division.toLowerCase().includes(selectedDivision.toLowerCase()) &&
-                        value.date.includes(searchDate))
+        } else {
+            const currentPosts = duplicateAllCirculars
+                .filter((value) => {
+                    if (searchTerm === "" && selectedDivision === "" && searchDate === "") {
+                        return value;
+                    } else if (
+                        (value.eng_title.toLowerCase().includes(searchTerm.toLowerCase()) &&
+                            value.division.toLowerCase().includes(selectedDivision.toLowerCase()) &&
+                            value.date.includes(searchDate))
 
-                ) {
+                        ||
 
-                    return value;
-                }
-            })
-        let num = 0;
-        const newList = currentPosts.map((post) => {
-            const title = post.sin_title && post.eng_title
-                ? post.sin_title // If both Sinhala and English titles are available, use Sinhala.
-                : post.eng_title || post.sin_title; // If only one title is available, use it.
-            num++
-            return {
-                number: num + '.',
-                document: post.document,
-                circularName: title
-            };
-        });
-        setNewCircularList(newList)
-        setSelectedPdfFile(null)
-        setSelectedRow(null)
+                        (value.sin_title.toLowerCase().includes(searchTerm) &&
+                            value.division.toLowerCase().includes(selectedDivision.toLowerCase()) &&
+                            value.date.includes(searchDate))
 
+                    ) {
 
-        console.log("set", currentPosts)
+                        return value;
+                    }
+                })
+            let num = 0;
+            const newList = currentPosts.map((post) => {
+                const title = post.sin_title && post.eng_title
+                    ? post.sin_title // If both Sinhala and English titles are available, use Sinhala.
+                    : post.eng_title || post.sin_title; // If only one title is available, use it.
+                num++
+                return {
+                    number: num + '.',
+                    document: post.document,
+                    circularName: title
+                };
+            });
+            setAllCirculars(currentPosts)
+            setNewCircularList(newList)
+            setSelectedPdfFile(null)
+            setSelectedRow(null)
+        }
+
 
     }, [selectedDivision]);
 
@@ -104,9 +114,11 @@ function AllCirculars({ selectedDivision, isDarkMode }) {
 
     }, []);
 
-    const handleReset = (clearFilters) => {
+    const handleReset = (clearFilters, confirm) => {
+
         clearFilters();
         setSearchText('');
+        confirm();
     };
 
     const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -147,7 +159,7 @@ function AllCirculars({ selectedDivision, isDarkMode }) {
                         Search
                     </Button>
                     <Button
-                        onClick={() => clearFilters && handleReset(clearFilters)}
+                        onClick={() => clearFilters && handleReset(clearFilters, confirm)}
                         size="small"
                         style={{
                             width: 90,
@@ -210,35 +222,80 @@ function AllCirculars({ selectedDivision, isDarkMode }) {
             ),
     });
 
+
     const columns = [
         {
             title: '',
             dataIndex: 'number',
             key: 'number',
-            width: '5%',
+            width: '8%',
+            render: (text, record, index) => index + 1 + '.',
 
         },
         {
-            title: 'Circular Name',
-            dataIndex: 'circularName',
-            key: 'circularName',
-            width: '95%',
-            ...getColumnSearchProps('circularName'),
+            title: 'Division',
+            dataIndex: 'division',
+            key: 'division',
+            width: '15%',
+            ...getColumnSearchProps('division'),
             ellipsis: true
+        },
+        {
+            title: 'Circular Date',
+            dataIndex: 'date',
+            key: 'date',
+            width: '15%',
+            ...getColumnSearchProps('date'),
+            ellipsis: true,
+            render: text => {
+                const formattedDate = new Date(text).toLocaleDateString('en-GB'); // Adjust the locale as needed
+                return <span style={{ whiteSpace: 'pre-line' }}>{formattedDate}</span>;
+            },
+        },
+
+        {
+            title: 'Circular Name',
+            dataIndex: 'sin_title',
+            key: 'sin_title',
+            width: '75%',
+            ...getColumnSearchProps('sin_title'),
+            ellipsis: true,
+            render: text => <span style={{ whiteSpace: 'pre-line' }}>{text}</span>,
+        },
+        {
+            title: 'KeyWords',
+            dataIndex: 'keywords',
+            key: 'keywords',
+            width: '15%',
+            ...getColumnSearchProps('keywords'),
+            ellipsis: true,
+            render: text => (
+                <div>
+                    {text.split(',').map((tag, index) => (
+                        index < 2 && (
+                            <Tag key={index} color="green">
+                                {tag.trim()}
+                            </Tag>
+                        )
+
+                    ))}
+                </div>
+            ),
         },
 
 
     ];
+
     const dataSource = newCircularList;
     const handleRowClick = record => {
-        setSelectedRow(record.number); // Store the selected row ID
+        setSelectedRow(record._id); // Store the selected row ID
         setSelectedPdfFile(record.document)
 
 
     };
     const rowClassName = (record) => {
         let classes = 'pointer'; // Adding 'pointer' class
-        if (record.number === selectedRow) {
+        if (record._id === selectedRow) {
             classes += ' selected-row'; // Adding 'selected-row' class for the selected row
         }
         return classes;
@@ -246,14 +303,75 @@ function AllCirculars({ selectedDivision, isDarkMode }) {
 
 
 
-    return (
-        console.log('height',screenHeight,' wifth',screenWidth),
-        <>
-            <Breadcrumb style={{ margin: '10px 0' }}>
-                <Breadcrumb.Item>All Circulars</Breadcrumb.Item>
-                <Breadcrumb.Item>{selectedDivision}</Breadcrumb.Item>
+    useEffect(() => {
+        const checkFileExistence = async () => {
+            try {
+                const response = await fetch(filePaths.FILE_SAVE_BASE_PATH + selectedPdfFile);
 
-            </Breadcrumb>
+                const responseContentType = response.headers.get('content-type');
+
+
+                // Check if the content type is PDF or HTML
+                if (responseContentType.includes('application/pdf')) {
+                    // It's a PDF
+
+                    setFileExists(true);
+                } else if (responseContentType.includes('text/html')) {
+                    // It's HTML
+
+                    setFileExists(false);
+                } else {
+                    // It's neither PDF nor HTML
+
+                    setFileExists(false);
+                }
+
+            } catch (error) {
+                console.error('Error checking file existence:', error);
+                setFileExists(false);
+            }
+        };
+
+        if (selectedPdfFile) {
+            checkFileExistence();
+        }
+    }, [selectedRow]);
+
+    const handleSelectChange = (selectedOption) => {
+        console.log(selectedOption)
+        if (selectedOption) {
+        
+          window.open(selectedOption, '_blank');
+        }
+      };
+
+
+    return (
+
+        <>
+
+
+            <Row>
+                <Col xs={12} lg={3}>
+                    <Breadcrumb style={{ margin: '10px 0' }}>
+                        <Breadcrumb.Item>Circulars</Breadcrumb.Item>
+                        <Breadcrumb.Item>{selectedDivision ? selectedDivision : 'All'}</Breadcrumb.Item>
+
+                    </Breadcrumb>
+                </Col>
+                <Col xs={12} lg={21}>
+                    <Select size="small" defaultValue="Gov Circulars" style={{marginTop:"8px"}} options={OtherCircularsSites} onChange={handleSelectChange}/>
+                      
+                   
+
+                </Col>
+            </Row>
+
+
+
+
+
+
 
             <Row gutter={[16, 16]}>
 
@@ -264,11 +382,11 @@ function AllCirculars({ selectedDivision, isDarkMode }) {
                             background: isDarkMode ? 'var(--content-container-bg-dark)' : 'var(--content-container-bg-light)',
                         }}
                     >
-                        <Divider orientation="left" orientationMargin="0">All Circulars</Divider>
+                        <Divider orientation="left" orientationMargin="0">Circulars</Divider>
 
 
                         <Table
-                            dataSource={dataSource}
+                            dataSource={allCirculars}
                             columns={columns.map(column => {
                                 if (column.dataIndex === 'circularName') {
                                     return {
@@ -280,7 +398,7 @@ function AllCirculars({ selectedDivision, isDarkMode }) {
                             })}
                             pagination={{ pageSize: 10 }}
                             scroll={{
-                                y: screenHeight > 960 ? 600 : 350,
+                                y: screenHeight > 900 ? "90%" : 350,
                                 x: screenHeight > 960 ? false : true
 
                             }}
@@ -307,26 +425,29 @@ function AllCirculars({ selectedDivision, isDarkMode }) {
                         <Divider orientation="left" orientationMargin="0">{selectedPdfFile ? <Button
                             type="text"
                             icon={<ExportOutlined />}
-                            onClick={() => window.open(filePaths.FILE_SAVE_BASE_PATH  + selectedPdfFile, '_blank')}
+                            onClick={() => window.open(filePaths.FILE_SAVE_BASE_PATH + selectedPdfFile, '_blank')}
                         >
                             <span style={{ fontWeight: '500', fontSize: '16px' }}>Open in New Tab</span>
                         </Button> : 'Selected Pdf File'}</Divider>
 
 
 
-                        {selectedPdfFile ? <div className="pdf-container">
-
-                            <iframe
-
-                                title="PDF Viewer"
-                                width="100%"
-                                height={screenHeight > 960 ? '700' : '400'}
-                                src={filePaths.FILE_SAVE_BASE_PATH + selectedPdfFile}
-                                allowFullScreen
-                                frameBorder="0"
-                            ></iframe>
+                        <div className="pdf-container">
+                            {selectedPdfFile && fileExists ? (
+                                <iframe
+                                    title="PDF Viewer"
+                                    width="100%"
+                                    height="90%"
+                                    src={filePaths.FILE_SAVE_BASE_PATH + selectedPdfFile}
+                                    allowFullScreen
+                                    frameBorder="0"
+                                ></iframe>
+                            ) : (
+                                <div style={{ padding: '80px' }}>
+                                    {selectedPdfFile && <Empty />}
+                                </div>
+                            )}
                         </div>
-                            : <div style={{padding:'80px'}}><Empty /></div>}
                     </Content>
                 </Col>
 

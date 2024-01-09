@@ -37,24 +37,66 @@ function PdfUpload({ isDarkMode }) {
     const [inputVisible, setInputVisible] = useState(false);
     const [inputValue, setInputValue] = useState('');
     const inputRef = useRef(null);
-    const [tags, setTags] = useState(['Tag 1', 'Tag 2', 'Tag 3']);
+    const [tags, setTags] = useState(['Tag 1']);
     const [documentSubLevel, setDocumentSubLevel] = useState([]);
     const [qmsAccess, setQmsAccess] = useState(false);
+    const [refrenceOptions, setRefrenceOptions] = useState([]);
 
+
+    const getAllRefrences = (value) => {
+
+     
+        setLoaderStatus(true)
+        axios.post(appURLs.web + webAPI.viewAllByDocumentLevel, { documentLevel: value })
+            .then((res) => {
+
+                if (res.status === 200) {
+
+                    const refrenceOptions = res.data.map(item => ({
+                        value: item._id,
+                        label: item.sin_title
+                    }));
+
+                    setRefrenceOptions(refrenceOptions);
+                    setLoaderStatus(false)
+
+                }
+                // setLoader(false);
+            })
+            .catch((error) => {
+                setLoaderStatus(false)
+                Swal.fire({
+                    position: 'top-end',
+                    icon: 'error',
+                    title: 'Network Error',
+                    showConfirmButton: false,
+                    timer: 1500,
+                });
+                console.error("Error", error);
+            });
+
+
+    }
 
 
     const onDocLevelSelect = (value) => {
 
+
+
         form.resetFields(['subLevel']);
 
         if (value === 'DL1') {
+            getAllRefrences('DL2');
             setDocumentSubLevel(DL1_SubLevels)
         } else if (value === 'DL2') {
+            getAllRefrences('DL3');
             setDocumentSubLevel(DL2_SubLevels)
         } else if (value === 'DL3') {
+            getAllRefrences('DL4');
             setDocumentSubLevel(DL3_SubLevels)
         }
         else if (value === 'DL4') {
+            setRefrenceOptions([]);
             setDocumentSubLevel(DL4_SubLevels)
         }
 
@@ -68,7 +110,7 @@ function PdfUpload({ isDarkMode }) {
 
     const handleClose = (removedTag) => {
         const newTags = tags.filter((tag) => tag !== removedTag);
-        console.log(newTags);
+
         setTags(newTags);
     };
 
@@ -98,7 +140,7 @@ function PdfUpload({ isDarkMode }) {
     };
 
     const tagChild = tags.map(forMap);
-    console.log("tag child", tagChild)
+
     const tagPlusStyle = {
         background: token.colorBgContainer,
         borderStyle: 'dashed',
@@ -116,25 +158,25 @@ function PdfUpload({ isDarkMode }) {
         if (inputValue && tags.indexOf(inputValue) === -1) {
             setTags([...tags, inputValue]);
         }
-        console.log("tags", tags)
+
         setInputVisible(false);
         setInputValue('');
     };
 
-    async function postPdfData(formData, config , values) {
+    async function postPdfData(formData, config, values) {
 
         const endPath = values.qmsAccess ? webAPI.qmsPdfFileInsert : webAPI.pdfFileInsert;
 
         setLoaderStatus(true)
         let res = await axios.post(appURLs.web + endPath, formData, config)
             .then((res) => {
-                if(res.status === 200){
+                if (res.status === 200) {
                     setLoaderStatus(false)
                     setLoading(false);
-                    alert('completed') 
+
                 }
-           
-                // history.push('/allCirculars');
+
+                history.push('/allCirculars');
             })
             .catch((error) => {
                 setLoading(false);
@@ -156,8 +198,8 @@ function PdfUpload({ isDarkMode }) {
 
         setLoading(true);
         // Handle form submission here
-        console.log('Received values:', values);
 
+      
         const pdfFileData = values.pdfUpload[0].originFileObj;
 
         const formData = new FormData();
@@ -167,7 +209,9 @@ function PdfUpload({ isDarkMode }) {
             formData.append("qmsAccess", values.qmsAccess);
             formData.append("subLevel", values.subLevel);
             formData.append("documentLevel", values.documentLevel);
-          
+            formData.append("unite", values.division);
+            formData.append("refrences", values.refrences);
+
         }
 
         formData.append("eng_title", values.pdfTitle);
@@ -186,7 +230,7 @@ function PdfUpload({ isDarkMode }) {
             }
         };
 
-        await postPdfData(formData, config,values)
+        await postPdfData(formData, config, values)
 
     };
 
@@ -198,6 +242,7 @@ function PdfUpload({ isDarkMode }) {
     };
 
     const handleClear = () => {
+        setRefrenceOptions([])
         setDocumentSubLevel([])
         form.resetFields(); // Reset form fields
     };
@@ -341,7 +386,7 @@ function PdfUpload({ isDarkMode }) {
                                             onChange={(checked) => setQmsAccess(checked)}
                                             checkedChildren="True"
                                             unCheckedChildren="False"
-                                            style={{ marginTop: '-10px' }}
+                                            style={{ marginTop: '-10px', backgroundColor: qmsAccess ? 'var( --theam-color)' : 'gray' }}
                                         />
                                     </Item>
 
@@ -379,14 +424,39 @@ function PdfUpload({ isDarkMode }) {
                                             options={documentSubLevel} />
                                     </Item>
                                 </Col>
-                            </Row></>
+                            </Row>
+                                <Row>
+                                    <Col lg={12} xs={24}>
+                                        <Item
+                                            label="Refrences"
+                                            name="refrences"
+
+                                        >
+
+                                            <Select
+                                                mode="multiple"
+                                                allowClear
+                                                showSearch
+                                                placeholder="Select the Refrences"
+                                                optionFilterProp="children"
+                                                filterOption={(input, option) => (option?.label ?? '').includes(input)}
+                                                filterSort={(optionA, optionB) =>
+                                                    (optionA?.label ?? '').toLowerCase().localeCompare((optionB?.label ?? '').toLowerCase())
+                                                }
+                                                options={refrenceOptions}
+
+                                            />
+                                        </Item>
+                                    </Col>
+                                </Row>
+                            </>
 
                             }
 
 
-                            <Item name="confirmation" valuePropName="checked" >
+                            {/* <Item name="confirmation" valuePropName="checked" >
                                 <Checkbox>All Details are Correct</Checkbox>
-                            </Item>
+                            </Item> */}
 
                             <Row style={{ marginTop: "20px", marginBottom: '20px' }}>
                                 <Col span={24} style={{ textAlign: 'right' }}>
