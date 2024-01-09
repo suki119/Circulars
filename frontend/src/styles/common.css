@@ -23,8 +23,15 @@
 
 @media (min-height: 900px) {
     .common-cotent-container {
-        height: 800px; /* Adjust maximum height for smaller screens */
+        min-height: 740px /* Adjust maximum height for smaller screens */;
+        height: 100%;
     }
-
-
 }
+
+@media (max-height: 900px) {
+    .common-cotent-container {
+        min-height: 640px /* Adjust maximum height for smaller screens */;
+       
+    }
+}
+

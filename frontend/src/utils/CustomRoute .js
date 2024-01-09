@@ -2,7 +2,7 @@ import React from 'react';
 import { Route } from 'react-router-dom';
 
 const CustomRoute = ({ component: Component, ...rest }) => {
-    console.log("Props passed to component:", rest);
+   
   return (
     <Route
       {...rest}

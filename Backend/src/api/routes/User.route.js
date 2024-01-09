@@ -10,6 +10,8 @@ router.put( "/:id",UserCtrl.updateUser);
 //delete user data
 router.delete( "/:id",UserCtrl.deleteUser);
 
+router.get( "/:id",UserCtrl.getUserById);
+
 //Get all details
 router.get( "/",UserCtrl.readAllUsers);
 

@@ -2,7 +2,7 @@ const multer = require('multer');
 
 const storage = multer.diskStorage({
     destination:function (req,file,callback){
-        callback(null,'D:/Pdf_Upload/My_development/frontend/public/PDFFiles');
+        callback(null,'D:/Pdf_Upload/Git/Circulars/frontend/public/PDFFiles');
     },
     filename:function (req,file,callback){
         callback(null,Date.now() + file.originalname);

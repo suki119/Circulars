@@ -6,7 +6,7 @@ const {upload} = require("../../utils/Upload");
 router.post( "/",upload.single('document'),FileUploadCtrl.createFileUpload);
 
 //update upload data
-router.put( "/",FileUploadCtrl.updateFileUpload);
+router.put( "/:id",FileUploadCtrl.updateFileUpload);
 
 //delete upload data
 router.delete( "/:id",FileUploadCtrl.deleteFileUpload);

@@ -5,13 +5,16 @@ import { InboxOutlined } from '@ant-design/icons';
 import moment from 'moment';
 
 import {
+    UserDocumentLevels,
+    divisions,
     unites,
     UserRoles,
     DocumentLevels,
     DL1_SubLevels,
     DL2_SubLevels,
     DL3_SubLevels,
-    DL4_SubLevels
+    DL4_SubLevels,
+    DLALL_SubLevels
 } from '../enums/constants'
 
 import axios from "axios";
@@ -33,10 +36,12 @@ function UserUpload({ isDarkMode }) {
     const history = useHistory();
 
     const [documentSubLevel, setDocumentSubLevel] = useState([]);
+    const [qmsAccess, setQmsAccess] = useState(false);
+    const [circularAccess, setCircularAccess] = useState(false);
 
 
     const onFinish = (values) => {
-        console.log("val", values)
+
         const modifiedValues = {
             ...values,
             passwordstatus: 'false', // Replace 'your_value_here' with the actual value
@@ -94,6 +99,8 @@ function UserUpload({ isDarkMode }) {
         }
         else if (value === 'DL4') {
             setDocumentSubLevel(DL4_SubLevels)
+        } else if (value === 'DLALL') {
+            setDocumentSubLevel(DLALL_SubLevels)
         }
 
     }
@@ -125,7 +132,7 @@ function UserUpload({ isDarkMode }) {
                             labelCol={{ span: 24 }}
                             wrapperCol={{ span: 24 }}
                             initialValues={{
-                                qmsAccess:false
+                                qmsAccess: false
                             }}
                             layout='vertical'
                         >
@@ -189,7 +196,7 @@ function UserUpload({ isDarkMode }) {
                                             filterSort={(optionA, optionB) =>
                                                 (optionA?.label ?? '').toLowerCase().localeCompare((optionB?.label ?? '').toLowerCase())
                                             }
-                                            options={unites}
+                                            options={divisions}
                                         />
                                     </Item>
                                 </Col>
@@ -221,7 +228,7 @@ function UserUpload({ isDarkMode }) {
                                             placeholder="Search to Select"
                                             onChange={(value) => onDocLevelSelect(value)}
 
-                                            options={DocumentLevels}
+                                            options={UserDocumentLevels}
                                         />
                                     </Item>
                                 </Col>
@@ -244,18 +251,36 @@ function UserUpload({ isDarkMode }) {
 
                             <Row gutter={16}>
                                 <Col lg={12} xs={24}>
+                                    <Row>
 
-                                    <Item
-                                        label="QMS Access"
-                                        name="qmsAccess"
+                                        <Col lg={10} xs={24}>
+                                            <Item
+                                                label="QMS Access"
+                                                name="qmsAccess"
 
-                                        style={{ display: 'inline-flex', marginTop: '10px' }}
-                                    >
-                                        <Switch checkedChildren="True" unCheckedChildren="False" style={{ marginTop: '-10px' }} />
-                                    </Item>
+                                                style={{ display: 'inline-flex', marginTop: '10px' }}
+                                            >
+                                                <Switch checkedChildren="True" unCheckedChildren="False" style={{ marginTop: '-10px', backgroundColor: qmsAccess ? 'var( --theam-color)' : 'gray' }}
+                                                    checked={qmsAccess} onChange={(checked) => setQmsAccess(checked)} />
+                                            </Item>
 
+                                        </Col>
+
+                                        <Col lg={14} xs={24}>
+                                            <Item
+                                                label="Circulars Access"
+                                                name="circularsAccess"
+
+                                                style={{ display: 'inline-flex', marginTop: '10px' }}
+                                            >
+                                                <Switch checkedChildren="True" unCheckedChildren="False" style={{ marginTop: '-10px', backgroundColor: circularAccess ? 'var( --theam-color)' : 'gray' }}
+                                                    checked={circularAccess} onChange={(checked) => setCircularAccess(checked)} />
+                                            </Item>
+
+                                        </Col>
+
+                                    </Row>
                                 </Col>
-
                             </Row>
 
 

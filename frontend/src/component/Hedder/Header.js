@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Layout, Button, theme, ConfigProvider } from 'antd';
+import React, { useState } from 'react';
+import { Layout, Button } from 'antd';
 import logoimgwording from '../../images/logo2.png'
 import {
   MenuFoldOutlined,
@@ -36,28 +36,41 @@ function AppHeader({ collapsed, onToggleCollapse, onToggleDarkMode, onLogOut }) 
   }
 
   return (
-    <Header style={{ padding: 0, background: isDarkMode ? "#0e0d0d" : "#ffffff" }}>
+    <Header style={{ textAlign: 'center', padding: 0, background: isDarkMode ? "#0e0d0d" : "#ffffff" }}>
 
-      {route != '/landing' ? <><Button
-        type="text"
-        icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-        onClick={onToggleCollapse}
-        style={{
-          fontSize: '16px',
-          width: 64,
-          height: 64,
-        }} /><Button
-          type="text"
-          icon={<BulbOutlined />}
-          onClick={toggleDarkMode}
-          style={{
-            fontSize: '16px',
-            width: 64,
-            height: 64,
-          }} /></> :
+      {route !== '/landing' ? (
+        <>
+        <div style={{float:'left'}}>
+          <Button
+            type="text"
+            icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+            onClick={onToggleCollapse}
+            style={{
+              fontSize: '16px',
+              width: 64,
+              height: 64,
+            }}
+          />
+          <Button
+            type="text"
+            icon={<BulbOutlined />}
+            onClick={toggleDarkMode}
+            style={{
+              fontSize: '16px',
+              width: 64,
+              height: 64,
+            }}
+          />
+          </div>
+        </>
+      ) : (
+        <>
 
-        <img src={logoimgwording} alt="Vector" style={{ width: screenWidth >= 768 ? '280px' : '250px', height: '90%', padding: '10px' }} />
-      }
+
+          <img src={logoimgwording} alt="Vector" style={{ width: screenWidth >= 768 ? '280px' : '250px', height: '90%', padding: '10px', float: "left" }} />
+          <span style={{ fontWeight: '600', display: screenWidth <= 900 && 'none' , fontSize:'25px' , color:'var(--theam-color)' }}>National Environmental Information Center</span>
+        </>
+      )}
 
       <div style={{ float: 'right' }}>
         <Button
@@ -68,12 +81,16 @@ function AppHeader({ collapsed, onToggleCollapse, onToggleDarkMode, onLogOut }) 
             fontSize: '16px',
             marginRight: '10px',
             height: 34,
+            fontWeight:'600'
           }}
-        >Log Out</Button>
+        >
+          Log Out
+        </Button>
       </div>
 
     </Header>
   );
+
 }
 
 export default AppHeader;

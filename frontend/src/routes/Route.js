@@ -1,6 +1,4 @@
-import accountMain from '../pages/account/accountMain';
-import productListMain from '../pages/product/productListMain';
-import AddProductMain from '../pages/product/AddProductMain';
+
 import LoginContainer from '../container/LoginContainer';
 import { Route, Switch } from 'react-router-dom';
 import AllCirculars from '../pages/AllCirculars';
@@ -12,17 +10,16 @@ import LandingPage from '../pages/LandingPage';
 import UserManage from '../pages/UserManage';
 import { authService } from '../services/AuthService';
 import Dashboard from '../pages/Dashboard';
+import QmsAllCirculars from '../pages/QmsAllCirculars';
+import UserProfile from '../pages/UserProfile';
+import LogManagement from '../pages/LogManagement';
 
 export const mainRoutes = [
-  {
-    path: '/account',
-    component: accountMain,
-    roles: ['admin', 'editor']
-  },
+
   {
     path: '/dashboard',
     component: Dashboard,
-    roles: ['admin', 'editor']
+    roles: ['admin', 'editor', 'user']
   },
   {
     path: '/pdfUpload',
@@ -34,16 +31,8 @@ export const mainRoutes = [
     component: PdfManage,
     roles: ['admin', 'editor']
   },
-  {
-    path: '/product',
-    component: productListMain,
-    roles: ['admin', 'editor']
-  },
-  {
-    path: '/add-product',
-    component: AddProductMain,
-    roles: ['admin', 'editor']
-  },
+
+
   {
     path: '/allCirculars',
     component: AllCirculars,
@@ -64,31 +53,66 @@ export const mainRoutes = [
     path: '/landing',
     component: LandingPage,
     roles: ['admin', 'editor']
-  }
+  },
+  {
+    path: '/logger',
+    component: LogManagement,
+    roles: ['admin', 'editor']
+  },
+  {
+    path: '/allQmsCirculars',
+    component: QmsAllCirculars,
+    roles: ['admin', 'editor']
+
+  },
+  {
+    path: '/userProfile',
+    component: UserProfile,
+    roles: ['admin', 'editor', 'user']
+
+  },
 
   // Add more routes if needed
 ];
 
 export const currentUserRoutes = () => {
 
-  const filterRoutesByRoles = (routes, userRoles) => {
+  const filterRoutesByRoles = (routes, userRoles, currentUse) => {
 
     return routes.filter(route => {
+      if (route.path === '/allQmsCirculars') {
+        if (currentUse.qmsAccess === 'true') {
+          return true
+        } else {
+          return false
+        }
 
-      if (Array.isArray(route.roles)) {
-        for (const role of route.roles) {
-          if (userRoles.includes(role)) {
-            return true;
-          }
+
+      } else if (route.path === '/allCirculars') {
+        if (currentUse.circularsAccess === 'true') {
+          return true
+        } else {
+          return false
         }
       }
-      return false;
+      else {
+        if (Array.isArray(route.roles)) {
+          for (const role of route.roles) {
+            if (userRoles.includes(role)) {
+              return true;
+            }
+          }
+        }
+        return false;
+      }
+
+
     });
   };
 
   const currentUse = authService.getCurrentUser();
   if (currentUse) {
-    const filteredRoutes = filterRoutesByRoles(mainRoutes, currentUse.position);
+    const filteredRoutes = filterRoutesByRoles(mainRoutes, currentUse.position, currentUse);
     return filteredRoutes;
   } else {
     return [];
@@ -101,7 +125,7 @@ export const authRoutes = [
 ]
 
 export const loginRoutes = ({ login, onLogin }) => (
-  console.log(login),
+
   <Switch>
     <Route
       path="/login"

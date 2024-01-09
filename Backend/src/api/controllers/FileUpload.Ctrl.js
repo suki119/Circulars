@@ -13,6 +13,7 @@ const createFileUpload = async (req, res) => {
         keywords:req.body.keywords,
         document:req.file.filename,
         date:req.body.date
+       
     });
 
     FileUpload.create(fileUpload).then(() => {
@@ -29,8 +30,8 @@ const updateFileUpload = (req,res)=>{
     console.log(`<-- ${req.method} Request`);
     const id = req.params.id;
     const fileUpload = new FileUpload(req.body);
-
-    FileUpload.findByIdAndUpdate(id,fileUpload).then(() => {
+    console.log(req.body);
+    FileUpload.findByIdAndUpdate(id,req.body).then(() => {
         res.json("File updated")
         console.log(`--> ${req.method} Response`);
     }).catch((error)=>{

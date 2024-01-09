@@ -6,9 +6,7 @@ import Sidebar from '../sidebar';
 import AllCircularsSidebar from '../allCircularsSideBar/sidebar';
 import AppHeader from '../Hedder/Header';
 import AppFooter from '../Footer/Footer';
-import accountMain from '../../pages/account/accountMain';
-import productListMain from '../../pages/product/productListMain';
-import AddProductMain from '../../pages/product/AddProductMain';
+
 import CustomRoute from '../../utils/CustomRoute ';
 import '../../styles/variables.css';
 import { mainRoutes } from '../../routes/Route';
@@ -18,11 +16,6 @@ import LandingPage from '../../pages/LandingPage';
 import { authService } from '../../services/AuthService';
 import { currentUserRoutes } from '../../routes/Route';
 import Cookies from 'js-cookie';
-
-
-
-
-
 
 
 function LoginLayout() {
@@ -49,7 +42,7 @@ function NotFoundPage() {
     <Result
       status="404"
       title="404"
-      subTitle="Sorry, the page you visited does not exist."
+      subTitle="Sorry, the page you visited does not exist or You dont have permission."
       extra={
         <Button style={{ backgroundColor: 'var(--theam-color)' }} type="primary" onClick={goBack}>
           Go Back
@@ -70,24 +63,18 @@ function HomePage({
   selectedDivision,
 
 }) {
-  console.log("mmmmmm",isDarkMode)
+ 
   const [currentUse, setCurrentUser] = useState('');
+  const screenHeight = window.innerHeight - 175;
 
-
-  // useEffect(() => {
-  //   console.log("val", localStorage.getItem("val"))
-  //   if (!localStorage.getItem("user")) {
-  //     window.location.pathname = "/login"
-  //   }
-  // }, [localStorage.getItem("user")])
+  
 
   useEffect(() => {
-    console.log("val", Cookies.get('jwtToken'))
-    if (!Cookies.get('jwtToken')) {
+   
+    if (!localStorage.getItem("U#T")) {
       window.location.pathname = "/login"
     }
-  }, [Cookies.get('jwtToken')])
-
+  }, [localStorage.getItem("U#T")])
 
 
   return (
@@ -114,7 +101,7 @@ function HomePage({
 
         <div style={{
           margin: '5px 16px',
-
+          minHeight: screenHeight
         }}>
           <Switch>
             {currentUserRoutes().map((route, index) => (
@@ -160,17 +147,19 @@ const MasterPage = () => {
         return <LoginLayout />;
         break
       case '/landing':
+      
         if (authService.getCurrentUser()) {
           return <LandingPage />;
         } else {
+       
           <NotFoundPage />
         }
-        break
+        
 
       default:
         // Check if the route is in mainRoutes based on the path property
         const isDashboardRoute = currentUserRoutes().some(mainRoute => mainRoute.path === route);
-      
+
         return (
           isDashboardRoute ? (
             <HomePage

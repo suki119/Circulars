@@ -1,10 +1,17 @@
 export const filePaths = {
     FILE_SAVE_BASE_PATH: 'PDFFiles/'
 }
+
+export const companyDetails = {
+    PHONE_NUMBER: '+123 456 22000'
+}
+
+
 export const divisions = [
+   
+    { label: "Admin", value: "Admin" },
     { label: "Chairman", value: "Chairman" },
     { label: "Director General", value: "Director General" },
-    { label: "Admin", value: "Admin" },
     { label: "Human Resource", value: "Human Resource" },
     { label: "Finance", value: "Finance" },
     { label: "EPC", value: "EPC" },
@@ -16,7 +23,7 @@ export const divisions = [
     { label: "Environment Promotion", value: "Environment Promotion" },
     { label: "NEIC/library", value: "NEIC/library" },
     { label: "HWCM", value: "HWCM" },
-    { label: "Solid Waste Managt", value: "Solid Waste Managt" },
+    { label: "Solid Waste Management", value: "Solid Waste Management" },
     { label: "Compliance Monitoring", value: "Compliance Monitoring" },
     { label: "IT unit", value: "IT unit" },
     { label: "Planning Unit", value: "Planning Unit" },
@@ -75,6 +82,19 @@ export const DocumentLevels = [
     { value: "DL3", label: "Document Level 3" },
     { value: "DL4", label: "Document Level 4" },
     
+    
+
+]
+
+
+export const UserDocumentLevels = [
+    { value: "DL1", label: "Document Level 1" },
+    { value: "DL2", label: "Document Level 2" },
+    { value: "DL3", label: "Document Level 3" },
+    { value: "DL4", label: "Document Level 4" },
+    { value: "DLALL", label: "All Document Levels" },
+    
+    
 
 ]
 
@@ -104,6 +124,30 @@ export const DL4_SubLevels = [
     { value: "Master list of records", label: "Master list of records" },
     { value: "Master list of forms", label: "Master list of forms" },
       
+
+]
+
+export const AllSubLevels = [
+    ...DL1_SubLevels,
+    ...DL2_SubLevels,
+    ...DL3_SubLevels,
+    ...DL4_SubLevels,
+  ];
+  
+
+export const DLALL_SubLevels = [
+    { value: "ALL", label: "All" },
+   
+      
+
+]
+
+export const OtherCircularsSites = [
+    { value: "https://ant.design/components/select", label: "Document Level 1" },
+    { value: "https://docs.google.com/document/d/1Lm9TAOkzSkDHCoCrNeaT3zB88i0ypYV7O-oC2900ITA/edit", label: "Document Level 2" },
+    { value: "https://www.epochconverter.com/", label: "Document Level 3" }, 
+    
+    
 
 ]
 

@@ -6,12 +6,12 @@ function LoginContainer({ login , onLogin  }) {
     const [loginStatus, setLoginStatus] = useState(false);
 
     useEffect(() => {
-        console.log("inside login", login);
+     
     }, [login]);
 
     
     useEffect(() => {
-        console.log("loginStatus loginStatus", loginStatus);
+   
     }, [loginStatus]);
 
     return (

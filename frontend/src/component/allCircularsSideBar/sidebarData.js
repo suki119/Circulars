@@ -19,10 +19,20 @@ export const items = [
     
     
   },
+  {
+    label: 'All',
+    key: '2',
+    icon: <FilePdfOutlined />,
+  
+    value: 'All',
+    
+    
+    
+  },
 
   {
     label: 'Chairman',
-    key: '2',
+    key: '3',
     icon: <FilePdfOutlined />,    
     value: 'Chairman',    
     
@@ -30,7 +40,7 @@ export const items = [
 
   {
     label: 'Director General',
-    key: '3',
+    key: '4',
     icon: <FilePdfOutlined />,    
     value: 'Director General',    
     
@@ -38,7 +48,7 @@ export const items = [
 
   {
     label: 'HRD, Admin & Finance',
-    key: '4',
+    key: '5',
     icon: <FilePdfOutlined />,
     children: [
       { icon: <FilePdfOutlined /> , label: 'Admin', key: '0', value: 'Admin', onClick: (name) => {} },
@@ -49,7 +59,7 @@ export const items = [
 
   {
     label: 'Env.Pollution Control',
-    key: '5',
+    key: '6',
     icon: <FilePdfOutlined />,
     children: [
       { icon: <FilePdfOutlined /> , label: 'EPC', key: '0', value: 'EPC', onClick: (name) => {} },
@@ -60,7 +70,7 @@ export const items = [
 
   {
     label: 'Env.Mnge & Assesment',
-    key: '6',
+    key: '7',
     icon: <FilePdfOutlined />,
     children: [
       { icon: <FilePdfOutlined /> , label: 'NRM', key: '0', value: 'NRM', onClick: (name) => {} },
@@ -72,7 +82,7 @@ export const items = [
 
   {
     label: 'Env.Edu & Awareness',
-    key: '7',
+    key: '8',
     icon: <FilePdfOutlined />,
     children: [
       { icon: <FilePdfOutlined /> , label: 'Environment Education', key: '0', value: 'Environment Education', onClick: (name) => {} },
@@ -85,18 +95,18 @@ export const items = [
   
   {
     label: 'Waste Management',
-    key: '8',
+    key: '9',
     icon: <FilePdfOutlined />,
     children: [
       { icon: <FilePdfOutlined /> , label: 'HWCM', key: '0', value: 'HWCM', onClick: (name) => {} },
-      { icon: <FilePdfOutlined /> , label: 'Solid Waste Managt', key: '1', value: 'Solid Waste Managt', onClick: (name) => {} }      
+      { icon: <FilePdfOutlined /> , label: 'Solid Waste Management', key: '1', value: 'Solid Waste Management', onClick: (name) => {} }      
      
     ],
   },
 
   {
     label: 'Regional Operation',
-    key: '9',
+    key: '10',
     icon: <FilePdfOutlined />,
     children: [
       { icon: <FilePdfOutlined /> , label: 'Compliance Monitoring', key: '0', value: 'Compliance Monitoring', onClick: (name) => {} },
@@ -107,7 +117,7 @@ export const items = [
 
   {
     label: 'Planning Unit',
-    key: '10',
+    key: '11',
     icon: <FilePdfOutlined />,    
     value: 'Planning Unit',    
     
@@ -115,7 +125,7 @@ export const items = [
 
   {
     label: 'R & D Unit',
-    key: '11',
+    key: '12',
     icon: <FilePdfOutlined />,    
     value: 'R & D Unit',    
     
@@ -123,7 +133,7 @@ export const items = [
 
   {
     label: 'Legal',
-    key: '12',
+    key: '13',
     icon: <FilePdfOutlined />,    
     value: 'Legal',    
     
@@ -131,7 +141,7 @@ export const items = [
 
   {
     label: 'Internal Audit',
-    key: '13',
+    key: '14',
     icon: <FilePdfOutlined />,    
     value: 'Internal Audit',    
     
@@ -139,7 +149,7 @@ export const items = [
 
   {
     label: 'Investigation Unit',
-    key: '14',
+    key: '15',
     icon: <FilePdfOutlined />,    
     value: 'Investigation Unit',    
     
@@ -147,7 +157,7 @@ export const items = [
 
   {
     label: 'Other',
-    key: '15',
+    key: '16',
     icon: <FilePdfOutlined />,    
     value: 'Other',    
     

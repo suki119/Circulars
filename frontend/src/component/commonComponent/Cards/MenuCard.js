@@ -16,7 +16,7 @@ function MenuCard({ title, description, icon, onCardClick, link, isDarkMode  }) 
     };
 
     return (
-        console.log('is',isDarkMode),
+      
         <Card
             hoverable
             style={{

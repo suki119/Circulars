@@ -15,7 +15,9 @@ const createFileUpload = async (req, res) => {
         date:req.body.date,
         documentLevel:req.body.documentLevel,
         subLevel:req.body.subLevel,
-        qmsAccess:req.body.qmsAccess
+        qmsAccess:req.body.qmsAccess,
+        unite:req.body.unite,
+        refrences:req.body.refrences
     });
 
     FileUpload.create(fileUpload).then(() => {
@@ -33,7 +35,7 @@ const updateFileUpload = (req,res)=>{
     const id = req.params.id;
     const fileUpload = new FileUpload(req.body);
 
-    FileUpload.findByIdAndUpdate(id,fileUpload).then(() => {
+    FileUpload.findByIdAndUpdate(id,req.body).then(() => {
         res.json("File updated")
         console.log(`--> ${req.method} Response`);
     }).catch((error)=>{
@@ -136,4 +138,40 @@ const getFileUploadByDivisionAndKeywords = (req,res)=> {
     })
 }
 
-module.exports = {createFileUpload,updateFileUpload,deleteFileUpload,readAllFileUploads,getFileUpload,getFileUploadByDivision,getFileUploadByDivisionAndDate,getFileUploadByDivisionAndTitles,getFileUploadByDivisionAndKeywords}
+
+
+
+const getFileUploadByDocumentLevel = (req,res)=> {
+    console.log(`<-- ${req.method} Request`);
+
+    const documentLevel = req.body.documentLevel;
+
+    FileUpload.find({documentLevel:documentLevel}).then((fileUpload)=>{
+        console.log(`--> ${req.method} Response`);
+        res.json(fileUpload);
+    }).catch((error)=>{
+        console.log(`${error.message}`)
+    })
+}
+
+const getFileUploadById = (req, res) => {
+    console.log(`<-- ${req.method} Request`);
+    const fileId = req.params.id; // Assuming you are passing the ID as a parameter
+
+    FileUpload.findById(fileId)
+        .then((fileUpload) => {
+            if (fileUpload) {
+                console.log(`--> ${req.method} Response`);
+                res.json(fileUpload);
+            } else {
+                res.status(404).json({ message: 'File not found' });
+            }
+        })
+        .catch((error) => {
+            console.log(`${error.message}`);
+            res.status(500).json({ message: 'Internal server error' });
+        });
+}
+
+
+module.exports = {getFileUploadById,createFileUpload,updateFileUpload,deleteFileUpload,readAllFileUploads,getFileUpload,getFileUploadByDivision,getFileUploadByDivisionAndDate,getFileUploadByDivisionAndTitles,getFileUploadByDivisionAndKeywords,getFileUploadByDocumentLevel}

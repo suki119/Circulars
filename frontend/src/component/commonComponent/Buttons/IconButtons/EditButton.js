@@ -13,6 +13,7 @@ const EditButton = (props) => {
                     backgroundColor: '#f9f9f9',
                     color: 'var( --theam-color)',
                     border: '1px solid rgba(0, 0, 0, 0.23)',
+                    marginRight: '8px' 
                 }}
                 onClick={props.onClick}
                 

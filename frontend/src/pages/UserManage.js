@@ -17,13 +17,15 @@ import deleteButton from '../component/commonComponent/Buttons/IconButtons/Delet
 import DeleteButton from "../component/commonComponent/Buttons/IconButtons/DeleteButton ";
 
 import {
+    UserDocumentLevels,
     unites,
     UserRoles,
     DocumentLevels,
     DL1_SubLevels,
     DL2_SubLevels,
     DL3_SubLevels,
-    DL4_SubLevels
+    DL4_SubLevels,
+    DLALL_SubLevels
 } from '../enums/constants'
 
 
@@ -53,16 +55,18 @@ function UserManage({ isDarkMode }) {
     let [editRecord, setEditRecord] = useState(null);
     const [documentSubLevel, setDocumentSubLevel] = useState([]);
     const [qmsAccess, setQmsAccess] = useState(false);
+    const [circularAccess, setCircularAccess] = useState(false);
 
     useEffect(() => {
         // Set the initial state when editRecord changes
         if (editRecord) {
             setQmsAccess(editRecord.qmsAccess === 'true');
+            setCircularAccess(editRecord.circularsAccess === 'true');
         }
     }, [editRecord]);
 
     const onFinish = (values) => {
-        console.log("vals", values)
+  
 
 
         setLoaderStatus(true)
@@ -168,7 +172,7 @@ function UserManage({ isDarkMode }) {
 
 
         Pdfform.setFieldsValue({ ...record });
-        console.log("edit", record)
+       
         setEditRecord(record);
         setEditDialogVisible(true);
     }
@@ -178,7 +182,7 @@ function UserManage({ isDarkMode }) {
         setLoaderStatus(true)
         axios.get(appURLs.web + webAPI.getAllUsers)
             .then((res) => {
-                console.log(res)
+               
                 if (res.status === 200) {
 
                     setAllUsers(res.data);
@@ -201,9 +205,10 @@ function UserManage({ isDarkMode }) {
             });
     };
 
-    const handleReset = (clearFilters) => {
+    const handleReset = (clearFilters,confirm) => {
         clearFilters();
         setSearchText('');
+        confirm();
     };
 
     const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -244,7 +249,7 @@ function UserManage({ isDarkMode }) {
                         Search
                     </Button>
                     <Button
-                        onClick={() => clearFilters && handleReset(clearFilters)}
+                        onClick={() => clearFilters && handleReset(clearFilters,confirm)}
                         size="small"
                         style={{
                             width: 90,
@@ -373,7 +378,22 @@ function UserManage({ isDarkMode }) {
             title: 'QMS Accsess',
             dataIndex: 'qmsAccess',
             key: 'qmsAccess',
-            width: '20%',
+            width: '10%',
+
+            ellipsis: true,
+            render: text =>
+                <span style={{ whiteSpace: 'pre-line' }}> <span>
+                    <Tag color={text === 'true' ? 'green' : 'red'}>
+                        {text === 'true' ? 'Granted' : 'Denied'}
+                    </Tag>
+                </span></span>,
+        },
+
+        {
+            title: 'Circular Accsess',
+            dataIndex: 'circularsAccess',
+            key: 'circularsAccess',
+            width: '10%',
 
             ellipsis: true,
             render: text =>
@@ -451,6 +471,8 @@ function UserManage({ isDarkMode }) {
             setDocumentSubLevel(DL3_SubLevels);
         } else if (value === 'DL4') {
             setDocumentSubLevel(DL4_SubLevels);
+        } else if (value === 'DLALL') {
+            setDocumentSubLevel(DLALL_SubLevels)
         }
     };
 
@@ -530,8 +552,8 @@ function UserManage({ isDarkMode }) {
                                 pageSize: 10,
                             }}
                             scroll={{
-                                y: screenHeight > 960 ? 560 : 270,
-                                x: screenWidth > 1350 ? false : true
+                                y: screenHeight > 900 ? "90%" : 350,
+                                x: true
 
                             }}
 
@@ -558,7 +580,6 @@ function UserManage({ isDarkMode }) {
                     wrapperCol={{ span: 24 }}
                     initialValues={editRecord}
                     // Set initial values from the editRecord
-
                     layout="vertical"
                 >
                     <Row gutter={16}>
@@ -598,7 +619,7 @@ function UserManage({ isDarkMode }) {
                                 rules={[{ required: true, message: 'Please input the Password!' }]}
 
                             >
-                                <Input />
+                                <Input.Password />
                             </Item>
                         </Col>
                     </Row>
@@ -621,7 +642,7 @@ function UserManage({ isDarkMode }) {
                                     filterSort={(optionA, optionB) =>
                                         (optionA?.label ?? '').toLowerCase().localeCompare((optionB?.label ?? '').toLowerCase())
                                     }
-                                    options={unites}
+                                    options={divisions}
                                 />
                             </Item>
                         </Col>
@@ -653,7 +674,7 @@ function UserManage({ isDarkMode }) {
                                     placeholder="Search to Select"
                                     onChange={(value) => onDocLevelSelect(value)}
 
-                                    options={DocumentLevels}
+                                    options={UserDocumentLevels}
                                 />
                             </Item>
                         </Col>
@@ -675,27 +696,39 @@ function UserManage({ isDarkMode }) {
 
 
                     <Row gutter={16}>
-                        <Col lg={12} xs={24}>
+                                <Col lg={12} xs={24}>
+                                    <Row>
 
-                            <Item
-                                label="QMS Access"
-                                name="qmsAccess"
+                                        <Col lg={10} xs={24}>
+                                            <Item
+                                                label="QMS Access"
+                                                name="qmsAccess"
 
-                                style={{ display: 'inline-flex', marginTop: '10px' }}
-                            >
-                                {console.log("as", editRecord && editRecord.qmsAccess === "true")}
-                                <Switch
-                                    checked={qmsAccess}
-                                    onChange={(checked) => setQmsAccess(checked)}
-                                    checkedChildren="True"
-                                    unCheckedChildren="False"
-                                    style={{ marginTop: '-10px' }}
-                                />
-                            </Item>
+                                                style={{ display: 'inline-flex', marginTop: '10px' }}
+                                            >
+                                                <Switch checkedChildren="True" unCheckedChildren="False" style={{ marginTop: '-10px', backgroundColor: qmsAccess ? 'var( --theam-color)' : 'gray' }}
+                                                    checked={qmsAccess} onChange={(checked) => setQmsAccess(checked)} />
+                                            </Item>
 
-                        </Col>
+                                        </Col>
 
-                    </Row>
+                                        <Col lg={14} xs={24}>
+                                            <Item
+                                                label="Circulars Access"
+                                                name="circularsAccess"
+
+                                                style={{ display: 'inline-flex', marginTop: '10px' }}
+                                            >
+                                                <Switch checkedChildren="True" unCheckedChildren="False" style={{ marginTop: '-10px', backgroundColor: circularAccess ? 'var( --theam-color)' : 'gray' }}
+                                                    checked={circularAccess} onChange={(checked) => setCircularAccess(checked)} />
+                                            </Item>
+
+                                        </Col>
+
+                                    </Row>
+                                </Col>
+                            </Row>
+
 
 
                     <Row style={{ marginBottom: "10px", marginTop: '-30px' }}>
